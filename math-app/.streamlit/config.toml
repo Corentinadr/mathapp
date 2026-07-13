@@ -1,0 +1,33 @@
+[client]
+toolbarMode = "minimal"
+
+[ui]
+hideTopBar = true
+
+[theme]
+font = "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+headingFont = "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+baseRadius = "12px"
+buttonRadius = "10px"
+
+[theme.light]
+primaryColor = "#4F46E5"
+backgroundColor = "#FAFAFA"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#171717"
+linkColor = "#4F46E5"
+borderColor = "#EAEAEA"
+
+[theme.light.sidebar]
+backgroundColor = "#FFFFFF"
+
+[theme.dark]
+primaryColor = "#6366F1"
+backgroundColor = "#0E0E10"
+secondaryBackgroundColor = "#17171A"
+textColor = "#ECECEC"
+linkColor = "#8B8FF5"
+borderColor = "#26262A"
+
+[theme.dark.sidebar]
+backgroundColor = "#17171A"

@@ -1,0 +1,4 @@
+sympy>=1.13
+streamlit>=1.59
+matplotlib>=3.8
+pytest>=8.0
