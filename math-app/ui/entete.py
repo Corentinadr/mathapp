@@ -53,10 +53,10 @@ header[data-testid="stHeader"] { display: none; }
 }
 .ma-nav-link:hover { color: var(--ma-text-1) !important; background: var(--ma-nav-hover); }
 
-/* ---- Menu déroulant ---- */
+/* ---- Menu déroulant (survol au desktop, tap au tactile via :focus-within) ---- */
 .ma-dd { position: relative; }
 .ma-chev { transition: transform 200ms ease; }
-.ma-dd:hover .ma-chev { transform: rotate(180deg); }
+.ma-dd:hover .ma-chev, .ma-dd:focus-within .ma-chev { transform: rotate(180deg); }
 .ma-dd-panel {
     position: absolute; top: 100%; left: 50%;
     transform: translate(-50%, 6px);
@@ -64,7 +64,7 @@ header[data-testid="stHeader"] { display: none; }
     opacity: 0; visibility: hidden; pointer-events: none;
     transition: all 200ms cubic-bezier(0.2, 0.8, 0.3, 1);
 }
-.ma-dd:hover .ma-dd-panel {
+.ma-dd:hover .ma-dd-panel, .ma-dd:focus-within .ma-dd-panel {
     opacity: 1; visibility: visible; pointer-events: auto;
     transform: translate(-50%, 0);
 }
@@ -92,6 +92,24 @@ header[data-testid="stHeader"] { display: none; }
 .ma-dd-titre { display: block; font-size: 14px; font-weight: 600; color: var(--ma-text-1); letter-spacing: -0.01em; }
 .ma-dd-sous { display: block; font-size: 12px; color: var(--ma-text-3); margin-top: 1px; }
 
+/* Entrées de navigation visibles uniquement dans le menu mobile */
+.ma-dd-nav { display: none; }
+.ma-dd-sep { display: none; height: 1px; background: var(--ma-border); margin: 6px 10px; }
+
+/* ---- Mobile : liens repliés dans le menu, panneau pleine largeur ---- */
+@media (max-width: 780px) {
+    .ma-nav > a.ma-nav-link { display: none; }
+    .ma-dd-nav { display: flex; }
+    .ma-dd-sep { display: block; }
+    .ma-dd { position: static; }
+    .ma-dd-panel {
+        position: fixed; top: 58px; left: 12px; right: 12px;
+        transform: translateY(6px); padding-top: 0;
+    }
+    .ma-dd:hover .ma-dd-panel, .ma-dd:focus-within .ma-dd-panel { transform: translateY(0); }
+    .ma-dd-inner { min-width: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .ma-header *, .ma-header { transition: none !important; }
 }
@@ -103,7 +121,7 @@ def _liens_dropdown() -> str:
     items = []
     for slug, glyphe, titre, sous_titre, _ in PAGES:
         items.append(
-            f'<a class="ma-dd-item" href="/{slug}" target="_self">'
+            f'<a class="ma-dd-item" href="/{slug}" target="_top">'
             f'<span class="ma-dd-glyph">{glyphe}</span>'
             f'<span><span class="ma-dd-titre">{titre}</span>'
             f'<span class="ma-dd-sous">{sous_titre}</span></span></a>'
@@ -118,15 +136,27 @@ def afficher_entete() -> None:
         'stroke="currentColor" stroke-width="2.5" stroke-linecap="round" '
         'stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>'
     )
+    nav_mobile = (
+        '<div class="ma-dd-sep"></div>'
+        '<a class="ma-dd-item ma-dd-nav" href="/" target="_top">'
+        '<span class="ma-dd-glyph">∫</span>'
+        '<span><span class="ma-dd-titre">Accueil</span></span></a>'
+        '<a class="ma-dd-item ma-dd-nav" href="/Entraînement" target="_top">'
+        '<span class="ma-dd-glyph">?</span>'
+        '<span><span class="ma-dd-titre">Entraînement</span></span></a>'
+        '<a class="ma-dd-item ma-dd-nav" href="/Formulaire" target="_top">'
+        '<span class="ma-dd-glyph">§</span>'
+        '<span><span class="ma-dd-titre">Formulaire</span></span></a>'
+    )
     header = (
         '<div class="ma-header"><div class="ma-header-inner">'
-        '<a class="ma-logo" href="/" target="_self"><span class="ma-logo-glyph">∫</span>MathApp</a>'
+        '<a class="ma-logo" href="/" target="_top"><span class="ma-logo-glyph">∫</span>MathApp</a>'
         '<nav class="ma-nav">'
-        '<a class="ma-nav-link" href="/" target="_self">Accueil</a>'
-        f'<div class="ma-dd"><span class="ma-nav-link">Exercices{chevron}</span>'
-        f'<div class="ma-dd-panel"><div class="ma-dd-inner">{_liens_dropdown()}</div></div></div>'
-        '<a class="ma-nav-link" href="/Entraînement" target="_self">Entraînement</a>'
-        '<a class="ma-nav-link" href="/Formulaire" target="_self">Formulaire</a>'
+        '<a class="ma-nav-link" href="/" target="_top">Accueil</a>'
+        f'<div class="ma-dd"><span class="ma-nav-link" tabindex="0">Exercices{chevron}</span>'
+        f'<div class="ma-dd-panel"><div class="ma-dd-inner">{_liens_dropdown()}{nav_mobile}</div></div></div>'
+        '<a class="ma-nav-link" href="/Entraînement" target="_top">Entraînement</a>'
+        '<a class="ma-nav-link" href="/Formulaire" target="_top">Formulaire</a>'
         '</nav></div></div>'
     )
     st.markdown(_CSS + header, unsafe_allow_html=True)

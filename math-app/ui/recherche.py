@@ -169,17 +169,19 @@ function aller(i) {
   if (!resultats[i]) return;
   var chemin = resultats[i].it.chemin;
   /* L'iframe est sandboxée sans allow-top-navigation : on navigue via un
-     lien créé dans le document parent (même origine), comme le header. */
+     lien créé dans le document parent (même origine), comme le header.
+     target=_top : sur Streamlit Cloud l'app vit dans une iframe wrapper —
+     naviguer la frame courante emboîterait le site dans lui-même. */
   try {
     var doc = window.parent.document;
     var a = doc.createElement("a");
     a.href = chemin;
-    a.target = "_self";
+    a.target = "_top";
     a.style.display = "none";
     doc.body.appendChild(a);
     a.click();
   } catch (e) {
-    window.parent.location.href = chemin;
+    window.top.location.href = chemin;
   }
 }
 function ouvrir() {

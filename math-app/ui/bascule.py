@@ -25,13 +25,17 @@ def afficher_bascule(sombre: bool) -> None:
 
     Écrit le thème choisi dans le localStorage de Streamlit (clé par chemin de page,
     pour que le choix tienne en naviguant), puis recharge la page.
+
+    Les clés sont dérivées du chemin réel de la frame Streamlit : en local les pages
+    vivent sur « /Dérivée », mais sur Streamlit Cloud l'app est embarquée dans une
+    iframe sur « /~/+/Dérivée » — des chemins codés en dur n'y correspondraient jamais.
     """
     cible = "Light" if sombre else "Dark"
     icone = _SOLEIL if sombre else _LUNE
     titre = "Passer en mode clair" if sombre else "Passer en mode sombre"
 
-    chemins = ['"/"', '"/Formulaire"', f'"/{quote("Entraînement")}"'] + [
-        f'"/{quote(slug)}"' for slug, *_ in PAGES
+    slugs = ['"Formulaire"', f'"{quote("Entraînement")}"'] + [
+        f'"{quote(slug)}"' for slug, *_ in PAGES
     ]
 
     if sombre:
@@ -54,10 +58,26 @@ def afficher_bascule(sombre: bool) -> None:
         "<script>"
         'document.getElementById("bascule").addEventListener("click", function () {'
         f"  var valeur = JSON.stringify('{cible}');"
-        f"  var chemins = [{', '.join(chemins)}];"
+        f"  var slugs = [{', '.join(slugs)}];"
         "  try {"
-        "    for (var i = 0; i < chemins.length; i++) {"
-        '      window.parent.localStorage.setItem("stActiveTheme-" + chemins[i] + "-v2", valeur);'
+        "    var stockage = window.parent.localStorage;"
+        "    var chemin = window.parent.location.pathname;"
+        "    var base = chemin;"
+        "    for (var i = 0; i < slugs.length; i++) {"
+        '      if (base.slice(-slugs[i].length - 1) === "/" + slugs[i]) {'
+        "        base = base.slice(0, base.length - slugs[i].length);"
+        "        break;"
+        "      }"
+        "    }"
+        '    if (base.slice(-1) !== "/") base += "/";'
+        "    var cles = [base];"
+        "    for (var i = 0; i < slugs.length; i++) cles.push(base + slugs[i]);"
+        "    for (var i = 0; i < cles.length; i++) {"
+        '      stockage.setItem("stActiveTheme-" + cles[i] + "-v2", valeur);'
+        "    }"
+        "    for (var i = stockage.length - 1; i >= 0; i--) {"
+        "      var k = stockage.key(i);"
+        '      if (k && k.indexOf("stActiveTheme-") === 0) stockage.setItem(k, valeur);'
         "    }"
         "    window.parent.location.reload();"
         "  } catch (e) { console.error(e); }"
